@@ -1,6 +1,7 @@
 import React from 'react';
 import {Location} from 'history';
 import * as ReactRouter from 'react-router';
+import styled from '@emotion/styled';
 
 import {t} from 'app/locale';
 import {Organization} from 'app/types';
@@ -13,7 +14,7 @@ import Alert from 'app/components/alert';
 import EventView from 'app/utils/discover/eventView';
 import {getUtcToLocalDateObject} from 'app/utils/dates';
 import {getParams} from 'app/components/organizations/globalSelectionHeader/getParams';
-import {StyledPageHeader} from 'app/views/eventsV2/landing';
+import space from 'app/styles/space';
 
 import {generatePerformanceEventView, DEFAULT_STATS_PERIOD} from './data';
 import Table from './table';
@@ -114,7 +115,9 @@ class PerformanceLanding extends React.Component<Props, State> {
           />
           <PageContent>
             <NoProjectMessage organization={organization}>
-              <StyledPageHeader>{t('Performance')}</StyledPageHeader>
+              <StyledPageHeader>
+                <div>{t('Performance')}</div>
+              </StyledPageHeader>
               {this.renderError()}
               <Charts
                 eventView={eventView}
@@ -135,5 +138,14 @@ class PerformanceLanding extends React.Component<Props, State> {
     );
   }
 }
+
+export const StyledPageHeader = styled('div')`
+  display: flex;
+  align-items: center;
+  font-size: ${p => p.theme.headerFontSize};
+  color: ${p => p.theme.gray4};
+  height: 40px;
+  margin-bottom: ${space(1)};
+`;
 
 export default withOrganization(PerformanceLanding);
