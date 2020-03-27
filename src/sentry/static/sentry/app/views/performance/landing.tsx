@@ -144,28 +144,6 @@ class PerformanceLanding extends React.Component<Props, State> {
     );
   }
 
-  renderAllTransactions() {
-    const {organization, location, router} = this.props;
-    const {eventView} = this.state;
-
-    return (
-      <React.Fragment>
-        <Charts
-          eventView={eventView}
-          organization={organization}
-          location={location}
-          router={router}
-        />
-        <Table
-          eventView={eventView}
-          organization={organization}
-          location={location}
-          setError={this.setError}
-        />
-      </React.Fragment>
-    );
-  }
-
   render() {
     const {organization, location, router} = this.props;
     const {eventView} = this.state;
