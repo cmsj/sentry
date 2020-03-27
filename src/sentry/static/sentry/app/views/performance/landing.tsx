@@ -15,8 +15,8 @@ import EventView from 'app/utils/discover/eventView';
 import {getUtcToLocalDateObject} from 'app/utils/dates';
 import {getParams} from 'app/components/organizations/globalSelectionHeader/getParams';
 import space from 'app/styles/space';
-import DropdownControl from 'app/components/dropdownControl';
-import MenuItem from 'app/components/menuItem';
+import Button from 'app/components/button';
+import ButtonBar from 'app/components/buttonBar';
 
 import {generatePerformanceEventView, DEFAULT_STATS_PERIOD} from './data';
 import Table from './table';
@@ -132,15 +132,20 @@ class PerformanceLanding extends React.Component<Props, State> {
     };
 
     return (
-      <DropdownControl label={this.getViewLabel(this.state.currentView)}>
+      <ButtonBar merged active={this.state.currentView}>
         {FILTER_VIEWS.map(viewKey => {
           return (
-            <MenuItem key={viewKey} onSelect={selectView(viewKey)}>
+            <Button
+              key={viewKey}
+              barId={viewKey}
+              size="small"
+              onClick={selectView(viewKey)}
+            >
               {this.getViewLabel(viewKey)}
-            </MenuItem>
+            </Button>
           );
         })}
-      </DropdownControl>
+      </ButtonBar>
     );
   }
 
