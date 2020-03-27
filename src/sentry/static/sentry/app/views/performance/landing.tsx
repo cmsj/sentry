@@ -122,20 +122,20 @@ class PerformanceLanding extends React.Component<Props, State> {
     }
   }
 
-  selectView(viewKey: FilterViewType) {
-    return () => {
-      this.setState({
-        currentView: viewKey,
-      });
-    };
-  }
-
   renderDropdown() {
+    const selectView = (viewKey: FilterViewType) => {
+      return () => {
+        this.setState({
+          currentView: viewKey,
+        });
+      };
+    };
+
     return (
       <DropdownControl label={this.getViewLabel(this.state.currentView)}>
         {FILTER_VIEWS.map(viewKey => {
           return (
-            <MenuItem key={viewKey} onSelect={this.selectView(viewKey)}>
+            <MenuItem key={viewKey} onSelect={selectView(viewKey)}>
               {this.getViewLabel(viewKey)}
             </MenuItem>
           );
@@ -164,17 +164,6 @@ class PerformanceLanding extends React.Component<Props, State> {
         />
       </React.Fragment>
     );
-  }
-
-  renderContent() {
-    switch (this.state.currentView) {
-      case 'ALL_TRANSACTIONS':
-        return this.renderAllTransactions();
-      case 'KEY_TRANSACTIONS':
-        return <div>key transactions</div>;
-      default:
-        return null;
-    }
   }
 
   render() {
