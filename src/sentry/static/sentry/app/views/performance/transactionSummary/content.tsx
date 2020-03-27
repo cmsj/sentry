@@ -169,6 +169,12 @@ const KeyTransactionButton = withApi(
     render() {
       const {isKeyTransaction} = this.state;
 
+      if (this.props.eventView.project.length >= 2) {
+        // should not be able to save a transaction as a key transaction if
+        // multiple projects are chosen.
+        return null;
+      }
+
       return (
         <Button onClick={this.toggleKeyTransaction}>
           <StyledIconStar
