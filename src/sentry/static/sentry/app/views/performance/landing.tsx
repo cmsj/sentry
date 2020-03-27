@@ -116,7 +116,7 @@ class PerformanceLanding extends React.Component<Props, State> {
       case 'ALL_TRANSACTIONS':
         return t('All Transactions');
       case 'KEY_TRANSACTIONS':
-        return t('Key Transactions');
+        return t('My Key Transactions');
       default:
         throw Error(`Unknown view: ${currentView}`);
     }
