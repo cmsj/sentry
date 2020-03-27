@@ -178,7 +178,8 @@ class PerformanceLanding extends React.Component<Props, State> {
   }
 
   render() {
-    const {organization} = this.props;
+    const {organization, location, router} = this.props;
+    const {eventView} = this.state;
 
     return (
       <SentryDocumentTitle title={t('Performance')} objSlug={organization.slug}>
@@ -195,7 +196,19 @@ class PerformanceLanding extends React.Component<Props, State> {
                 <div>{this.renderDropdown()}</div>
               </StyledPageHeader>
               {this.renderError()}
-              {this.renderContent()}
+              <Charts
+                eventView={eventView}
+                organization={organization}
+                location={location}
+                router={router}
+              />
+              <Table
+                eventView={eventView}
+                organization={organization}
+                location={location}
+                setError={this.setError}
+                keyTransactions={this.state.currentView === 'KEY_TRANSACTIONS'}
+              />
             </NoProjectMessage>
           </PageContent>
         </React.Fragment>

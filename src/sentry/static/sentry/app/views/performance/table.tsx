@@ -59,6 +59,7 @@ type Props = {
   organization: Organization;
   location: Location;
   setError: (msg: string | undefined) => void;
+  keyTransactions?: boolean;
 
   projects: Project[];
   loadingProjects: boolean;
@@ -210,11 +211,16 @@ class Table extends React.Component<Props> {
   };
 
   render() {
-    const {eventView, organization, location} = this.props;
+    const {eventView, organization, location, keyTransactions} = this.props;
     const columnOrder = eventView.getColumns();
 
     return (
-      <EventsV2 eventView={eventView} organization={organization} location={location}>
+      <EventsV2
+        eventView={eventView}
+        organization={organization}
+        location={location}
+        keyTransactions={keyTransactions}
+      >
         {({pageLinks, isLoading, tableData}) => (
           <div>
             <StyledSearchBar
