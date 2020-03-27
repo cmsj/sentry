@@ -15,10 +15,18 @@ import EventView from 'app/utils/discover/eventView';
 import {getUtcToLocalDateObject} from 'app/utils/dates';
 import {getParams} from 'app/components/organizations/globalSelectionHeader/getParams';
 import space from 'app/styles/space';
+import DropdownControl from 'app/components/dropdownControl';
+import MenuItem from 'app/components/menuItem';
 
 import {generatePerformanceEventView, DEFAULT_STATS_PERIOD} from './data';
 import Table from './table';
 import Charts from './charts/index';
+
+type FilterViewType = 'ALL_TRANSACTIONS' | 'KEY_TRANSACTIONS';
+const FILTER_VIEWS: Readonly<FilterViewType[]> = [
+  'ALL_TRANSACTIONS',
+  'KEY_TRANSACTIONS',
+] as const;
 
 type Props = {
   organization: Organization;
@@ -29,6 +37,7 @@ type Props = {
 type State = {
   eventView: EventView;
   error: string | undefined;
+  currentView: FilterViewType;
 };
 
 class PerformanceLanding extends React.Component<Props, State> {
@@ -36,9 +45,10 @@ class PerformanceLanding extends React.Component<Props, State> {
     return {...prevState, eventView: generatePerformanceEventView(nextProps.location)};
   }
 
-  state = {
+  state: State = {
     eventView: generatePerformanceEventView(this.props.location),
     error: undefined,
+    currentView: 'ALL_TRANSACTIONS',
   };
 
   renderError = () => {
@@ -101,9 +111,74 @@ class PerformanceLanding extends React.Component<Props, State> {
     return false;
   };
 
-  render() {
+  getViewLabel(currentView: FilterViewType): string {
+    switch (currentView) {
+      case 'ALL_TRANSACTIONS':
+        return t('All Transactions');
+      case 'KEY_TRANSACTIONS':
+        return t('Key Transactions');
+      default:
+        throw Error(`Unknown view: ${currentView}`);
+    }
+  }
+
+  selectView(viewKey: FilterViewType) {
+    return () => {
+      this.setState({
+        currentView: viewKey,
+      });
+    };
+  }
+
+  renderDropdown() {
+    return (
+      <DropdownControl label={this.getViewLabel(this.state.currentView)}>
+        {FILTER_VIEWS.map(viewKey => {
+          return (
+            <MenuItem key={viewKey} onSelect={this.selectView(viewKey)}>
+              {this.getViewLabel(viewKey)}
+            </MenuItem>
+          );
+        })}
+      </DropdownControl>
+    );
+  }
+
+  renderAllTransactions() {
     const {organization, location, router} = this.props;
     const {eventView} = this.state;
+
+    return (
+      <React.Fragment>
+        <Charts
+          eventView={eventView}
+          organization={organization}
+          location={location}
+          router={router}
+        />
+        <Table
+          eventView={eventView}
+          organization={organization}
+          location={location}
+          setError={this.setError}
+        />
+      </React.Fragment>
+    );
+  }
+
+  renderContent() {
+    switch (this.state.currentView) {
+      case 'ALL_TRANSACTIONS':
+        return this.renderAllTransactions();
+      case 'KEY_TRANSACTIONS':
+        return <div>key transactions</div>;
+      default:
+        return null;
+    }
+  }
+
+  render() {
+    const {organization} = this.props;
 
     return (
       <SentryDocumentTitle title={t('Performance')} objSlug={organization.slug}>
@@ -117,20 +192,10 @@ class PerformanceLanding extends React.Component<Props, State> {
             <NoProjectMessage organization={organization}>
               <StyledPageHeader>
                 <div>{t('Performance')}</div>
+                <div>{this.renderDropdown()}</div>
               </StyledPageHeader>
               {this.renderError()}
-              <Charts
-                eventView={eventView}
-                organization={organization}
-                location={location}
-                router={router}
-              />
-              <Table
-                eventView={eventView}
-                organization={organization}
-                location={location}
-                setError={this.setError}
-              />
+              {this.renderContent()}
             </NoProjectMessage>
           </PageContent>
         </React.Fragment>
@@ -142,6 +207,7 @@ class PerformanceLanding extends React.Component<Props, State> {
 export const StyledPageHeader = styled('div')`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   font-size: ${p => p.theme.headerFontSize};
   color: ${p => p.theme.gray4};
   height: 40px;
