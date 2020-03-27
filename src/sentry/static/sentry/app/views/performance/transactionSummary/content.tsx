@@ -51,16 +51,7 @@ class SummaryContent extends React.Component<Props> {
           const hasResults =
             tableData && tableData.data && tableData.meta && tableData.data.length > 0;
 
-          return (
-            <Button>
-              <StyledIconStar
-                size="xs"
-                color={hasResults ? theme.yellow : undefined}
-                solid={!!hasResults}
-              />
-              {t('Key Transaction')}
-            </Button>
-          );
+          return <KeyTransactionButton isKeyTransaction={!!hasResults} />;
         }}
       </EventsV2>
     );
@@ -120,6 +111,48 @@ class SummaryContent extends React.Component<Props> {
           </Side>
         </ContentBox>
       </React.Fragment>
+    );
+  }
+}
+
+type KeyTransactionButtonProps = {
+  isKeyTransaction: boolean;
+};
+
+type KeyTransactionButtonState = {
+  isKeyTransaction: boolean;
+};
+
+class KeyTransactionButton extends React.Component<
+  KeyTransactionButtonProps,
+  KeyTransactionButtonState
+> {
+  state: KeyTransactionButtonState = {
+    isKeyTransaction: this.props.isKeyTransaction,
+  };
+
+  toggleKeyTransaction = () => {
+    console.log('toggleKeyTransaction');
+
+    this.setState((prevState: KeyTransactionButtonState) => {
+      return {
+        isKeyTransaction: !prevState.isKeyTransaction,
+      };
+    });
+  };
+
+  render() {
+    const {isKeyTransaction} = this.state;
+
+    return (
+      <Button onClick={this.toggleKeyTransaction}>
+        <StyledIconStar
+          size="xs"
+          color={isKeyTransaction ? theme.yellow : undefined}
+          solid={!!isKeyTransaction}
+        />
+        {t('Key Transaction')}
+      </Button>
     );
   }
 }
