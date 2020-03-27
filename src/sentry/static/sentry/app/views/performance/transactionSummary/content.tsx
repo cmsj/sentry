@@ -3,11 +3,16 @@ import {Location} from 'history';
 import styled from '@emotion/styled';
 
 import {Organization} from 'app/types';
+import {t} from 'app/locale';
 import overflowEllipsis from 'app/styles/overflowEllipsis';
 import EventView from 'app/utils/discover/eventView';
 import {ContentBox, HeaderBox} from 'app/views/eventsV2/styles';
 import Tags from 'app/views/eventsV2/tags';
 import EventsV2 from 'app/utils/discover/eventsv2';
+import Button from 'app/components/button';
+import {IconStar} from 'app/icons';
+import space from 'app/styles/space';
+import theme from 'app/utils/theme';
 
 import SummaryContentTable from './table';
 import Breadcrumb from './breadcrumb';
@@ -24,6 +29,43 @@ type Props = {
 };
 
 class SummaryContent extends React.Component<Props> {
+  renderKeyTransactionButton() {
+    const {location, eventView, organization} = this.props;
+
+    return (
+      <EventsV2
+        eventView={eventView}
+        organization={organization}
+        location={location}
+        keyTransactions
+        extraQuery={{
+          // only need 1 query to confirm if the transaction is a key transaction
+          per_page: 1,
+        }}
+      >
+        {({isLoading, tableData}) => {
+          if (isLoading || !tableData) {
+            return null;
+          }
+
+          const hasResults =
+            tableData && tableData.data && tableData.meta && tableData.data.length > 0;
+
+          return (
+            <Button>
+              <StyledIconStar
+                size="xs"
+                color={hasResults ? theme.yellow : undefined}
+                solid={!!hasResults}
+              />
+              {t('Key Transaction')}
+            </Button>
+          );
+        }}
+      </EventsV2>
+    );
+  }
+
   render() {
     const {transactionName, location, eventView, organization, totalValues} = this.props;
 
@@ -38,6 +80,9 @@ class SummaryContent extends React.Component<Props> {
               transactionName={transactionName}
             />
           </div>
+          <KeyTransactionContainer>
+            {this.renderKeyTransactionButton()}
+          </KeyTransactionContainer>
           <StyledTitleHeader>{transactionName}</StyledTitleHeader>
         </HeaderBox>
         <ContentBox>
@@ -90,6 +135,15 @@ const StyledTitleHeader = styled('span')`
 
 const Side = styled('div')`
   grid-column: 2/3;
+`;
+
+const KeyTransactionContainer = styled('div')`
+  display: flex;
+  justify-content: flex-end;
+`;
+
+const StyledIconStar = styled(IconStar)`
+  margin-right: ${space(1)};
 `;
 
 export default SummaryContent;
