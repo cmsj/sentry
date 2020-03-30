@@ -19,8 +19,18 @@ export function saveKeyTransaction(
     }
   );
 
-  promise.catch(() => {
-    addErrorMessage(t('Unable to update key transaction'));
+  promise.catch(response => {
+    if (
+      response &&
+      response.responseJSON &&
+      response.responseJSON.non_field_errors &&
+      response.responseJSON.non_field_errors.length &&
+      response.responseJSON.non_field_errors[0]
+    ) {
+      addErrorMessage(response.responseJSON.non_field_errors[0]);
+    } else {
+      addErrorMessage(t('Unable to update key transaction'));
+    }
   });
 
   return promise;
@@ -43,8 +53,18 @@ export function deleteKeyTransaction(
     }
   );
 
-  promise.catch(() => {
-    addErrorMessage(t('Unable to update key transaction'));
+  promise.catch(response => {
+    if (
+      response &&
+      response.responseJSON &&
+      response.responseJSON.non_field_errors &&
+      response.responseJSON.non_field_errors.length &&
+      response.responseJSON.non_field_errors[0]
+    ) {
+      addErrorMessage(response.responseJSON.non_field_errors[0]);
+    } else {
+      addErrorMessage(t('Unable to update key transaction'));
+    }
   });
 
   return promise;

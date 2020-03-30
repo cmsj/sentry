@@ -99,23 +99,34 @@ class KeyTransactionButton extends React.Component<Props, State> {
   };
 
   toggleKeyTransaction = () => {
-    this.setState((prevState: State) => {
-      const nextIsKeyTransaction = !prevState.isKeyTransaction;
+    const {eventView, api, organization, transactionName} = this.props;
+    const projects = eventView.project as number[];
 
-      const {eventView, api, organization, transactionName} = this.props;
-
-      const projects = eventView.project as number[];
-
-      if (nextIsKeyTransaction) {
-        saveKeyTransaction(api, organization.slug, projects, transactionName);
-      } else {
-        deleteKeyTransaction(api, organization.slug, projects, transactionName);
-      }
-
-      return {
-        isKeyTransaction: !prevState.isKeyTransaction,
-      };
-    });
+    if (!this.state.isKeyTransaction) {
+      saveKeyTransaction(api, organization.slug, projects, transactionName)
+        .then(() => {
+          this.setState({
+            isKeyTransaction: true,
+          });
+        })
+        .catch(() => {
+          this.setState({
+            isKeyTransaction: false,
+          });
+        });
+    } else {
+      deleteKeyTransaction(api, organization.slug, projects, transactionName)
+        .then(() => {
+          this.setState({
+            isKeyTransaction: false,
+          });
+        })
+        .catch(() => {
+          this.setState({
+            isKeyTransaction: true,
+          });
+        });
+    }
   };
 
   render() {
