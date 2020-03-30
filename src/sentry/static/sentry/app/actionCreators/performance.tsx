@@ -1,4 +1,6 @@
 import {Client} from 'app/api';
+import {t} from 'app/locale';
+import {addErrorMessage} from 'app/actionCreators/indicator';
 
 export function saveKeyTransaction(
   api: Client,
@@ -16,6 +18,10 @@ export function saveKeyTransaction(
       data: {transaction: transactionName},
     }
   );
+
+  promise.catch(() => {
+    addErrorMessage(t('Unable to update key transaction'));
+  });
 
   return promise;
 }
@@ -36,6 +42,10 @@ export function deleteKeyTransaction(
       data: {transaction: transactionName},
     }
   );
+
+  promise.catch(() => {
+    addErrorMessage(t('Unable to update key transaction'));
+  });
 
   return promise;
 }
