@@ -33,37 +33,14 @@ type Props = {
 
 class SummaryContent extends React.Component<Props> {
   renderKeyTransactionButton() {
-    const {location, eventView, organization, transactionName} = this.props;
+    const {eventView, organization, transactionName} = this.props;
 
     return (
-      <EventsV2
+      <KeyTransactionButton
+        transactionName={transactionName}
         eventView={eventView}
         organization={organization}
-        location={location}
-        keyTransactions
-        extraQuery={{
-          // only need 1 query to confirm if the transaction is a key transaction
-          per_page: 1,
-        }}
-      >
-        {({isLoading, tableData}) => {
-          if (isLoading || !tableData) {
-            return null;
-          }
-
-          const hasResults =
-            tableData && tableData.data && tableData.meta && tableData.data.length > 0;
-
-          return (
-            <KeyTransactionButton
-              isKeyTransaction={!!hasResults}
-              transactionName={transactionName}
-              eventView={eventView}
-              organization={organization}
-            />
-          );
-        }}
-      </EventsV2>
+      />
     );
   }
 
@@ -127,13 +104,16 @@ class SummaryContent extends React.Component<Props> {
 
 type KeyTransactionButtonProps = {
   api: Client;
-  isKeyTransaction: boolean;
   eventView: EventView;
   organization: Organization;
   transactionName: string;
 };
 
 type KeyTransactionButtonState = {
+  isLoading: boolean;
+  keyFetchID: symbol | undefined;
+  error: null | string;
+
   isKeyTransaction: boolean;
 };
 
@@ -143,7 +123,73 @@ const KeyTransactionButton = withApi(
     KeyTransactionButtonState
   > {
     state: KeyTransactionButtonState = {
-      isKeyTransaction: this.props.isKeyTransaction,
+      isLoading: true,
+      keyFetchID: undefined,
+      error: null,
+
+      isKeyTransaction: false,
+    };
+
+    componentDidMount() {
+      this.fetchData();
+    }
+
+    componentDidUpdate(prevProps: KeyTransactionButtonProps) {
+      const orgSlugChanged = prevProps.organization.slug !== this.props.organization.slug;
+      const projectsChanged =
+        prevProps.eventView.project.length === 1 &&
+        this.props.eventView.project.length === 1 &&
+        prevProps.eventView.project[0] !== this.props.eventView.project[0];
+
+      if (orgSlugChanged || projectsChanged) {
+        this.fetchData();
+      }
+    }
+
+    fetchData = () => {
+      const {organization, eventView, transactionName} = this.props;
+
+      const projects = eventView.project as number[];
+
+      if (projects.length !== 1) {
+        return;
+      }
+
+      const url = `/organizations/${organization.slug}/is-key-transactions/`;
+      const keyFetchID = Symbol('keyFetchID');
+
+      this.setState({isLoading: true, keyFetchID});
+
+      this.props.api
+        .requestPromise(url, {
+          method: 'GET',
+          includeAllArgs: true,
+          query: {
+            project: projects.map(id => String(id)),
+            transaction: transactionName,
+          },
+        })
+        .then(([data, _, _jqXHR]) => {
+          if (this.state.keyFetchID !== keyFetchID) {
+            // invariant: a different request was initiated after this request
+            return;
+          }
+
+          this.setState({
+            isLoading: false,
+            keyFetchID: undefined,
+            error: null,
+            isKeyTransaction: !!data?.isKey,
+          });
+        })
+        .catch(err => {
+          this.setState({
+            isLoading: false,
+            keyFetchID: undefined,
+            error: err.responseJSON.detail,
+            isKeyTransaction: false,
+          });
+        });
     };
 
     toggleKeyTransaction = () => {
@@ -167,11 +213,9 @@ const KeyTransactionButton = withApi(
     };
 
     render() {
-      const {isKeyTransaction} = this.state;
+      const {isKeyTransaction, isLoading} = this.state;
 
-      if (this.props.eventView.project.length >= 2) {
-        // should not be able to save a transaction as a key transaction if
-        // multiple projects are chosen.
+      if (this.props.eventView.project.length !== 1 || isLoading) {
         return null;
       }
 
